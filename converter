@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# error checking
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <input_video_path> <output_path> <new_fps>"
+    exit 1
+fi
+
+input_video_path="$1"
+output_path="$2"
+new_fps="$3"
+
+# this actually does the conversion + adjust frame rate
+ffmpeg -i "$input_video_path" -vf "minterpolate='mi_mode=mci:mc_mode=aobmc:vsbmc=1:fps=$new_fps'" "$output_path"

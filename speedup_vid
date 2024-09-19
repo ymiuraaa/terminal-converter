@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    echo "Usage: $0 <input_video_path> <output_path> [speed_factor]"
+    echo "Example: $0 input.mp4 output.gif 2.0"
+    exit 1
+fi
+
+input_video_path="$1"
+output_path="$2"
+speed_factor="${3:-1.0}"
+
+setpts_value=$(echo "scale=2; 1/$speed_factor" | bc)
+
+# this actually does the speed up
+ffmpeg -i "$input_video_path" -filter:v "setpts=${setpts_value}*PTS" "$output_path"

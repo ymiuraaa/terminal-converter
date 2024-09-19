@@ -1,0 +1,56 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <input_file_path> <output_file_path> <codec_type>"
+    echo "Codec types: h264, ffv1, hevc, flac, alac"
+    exit 1
+fi
+
+# args as variables
+input_file_path="$1"
+output_file_path="$2"
+codec_type="$3"
+
+file_extension="${output_file_path##*.}"
+
+compress_video() {
+    case "$codec_type" in
+        h264)
+            ffmpeg -i "$input_file_path" -c:v libx264 -preset slow -qp 0 -c:a copy "$output_file_path"
+            ;;
+        ffv1)
+            ffmpeg -i "$input_file_path" -c:v ffv1 -c:a copy "$output_file_path"
+            ;;
+        hevc)
+            ffmpeg -i "$input_file_path" -c:v libx265 -x265-params lossless=1 -c:a copy "$output_file_path"
+            ;;
+        *)
+            echo "Invalid codec type for video. Use h264, ffv1, or hevc."
+            exit 1
+            ;;
+    esac
+}
+
+compress_audio() {
+    case "$codec_type" in
+        flac)
+            ffmpeg -i "$input_file_path" -c:a flac "$output_file_path"
+            ;;
+        alac)
+            ffmpeg -i "$input_file_path" -c:a alac "$output_file_path"
+            ;;
+        *)
+            echo "Invalid codec type for audio. Use flac or alac."
+            exit 1
+            ;;
+    esac
+}
+
+if [[ "$file_extension" == "mp4" || "$file_extension" == "mov" || "$file_extension" == "avi" || "$file_extension" == "mkv" ]]; then
+    compress_video
+elif [[ "$file_extension" == "wav" || "$file_extension" == "mp3" ]]; then
+    compress_audio
+else
+    echo "Unsupported file format. Use video formats (mp4, mov, avi, mkv) or audio formats (wav, mp3)."
+    exit 1
+fi
